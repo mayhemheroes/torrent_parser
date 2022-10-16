@@ -1,8 +1,8 @@
-project: mail-parser
-target: mail-parser-fuzz
+project: torrent-parser
+target: differential-fuzz
 testsuite:
     - file://mayhem/testsuite
 
 cmds:
-  - cmd: /mail-parser/mayhem/fuzz_mail_parsing.py
+  - cmd: /torrent_parser/mayhem/differential_fuzz.py
     libfuzzer: true

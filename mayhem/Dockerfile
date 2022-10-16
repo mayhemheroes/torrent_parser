@@ -1,9 +1,9 @@
 FROM fuzzers/atheris:2.0.7-python3.9
 
-ADD . /mail-parser
+ADD . /torrent_parser
 
 # Build
-WORKDIR /mail-parser
-RUN python3 setup.py install
+WORKDIR /torrent_parser
+RUN pip3 install .
 
-CMD ["/mail-parser/mayhem/fuzz_mail_parsing.py"]
+CMD ["/torrent_parser/mayhem/differential_fuzz.py"]
