@@ -6,6 +6,7 @@ import io
 with atheris.instrument_imports():
     import torrent_parser as tp
 
+
 @atheris.instrument_func
 def differential_fuzz(data):
     try:
@@ -18,6 +19,7 @@ def differential_fuzz(data):
         if data != decoded.encode():
             raise Exception("Differential fuzzing test failed")
 
+
 @atheris.instrument_func
 def fuzz_file_parser(data):
     fp = io.BytesIO(data)
@@ -26,6 +28,7 @@ def fuzz_file_parser(data):
     except tp.InvalidTorrentDataException:
         pass
 
+
 @atheris.instrument_func
 def fuzz_file_creation(data):
     try:
@@ -33,11 +36,23 @@ def fuzz_file_creation(data):
     except tp.InvalidTorrentDataException:
         pass
 
+
+@atheris.instrument_func
+def fuzz_json_parser(data):
+    try:
+        encoded = tp.encode(data)
+        decoded = tp.decode(encoded)
+        encoder = tp.JSONEncoderDataWrapperBytesToString()
+        encoder.process(decoded)
+    except tp.InvalidTorrentDataException:
+        pass
+
+
 @atheris.instrument_func
 def TestOneInput(data):
     fdp = atheris.FuzzedDataProvider(data)
 
-    fuzz_test = fdp.ConsumeIntInRange(0, 2)
+    fuzz_test = fdp.ConsumeIntInRange(0, 3)
     remaining_bytes = fdp.ConsumeBytes(fdp.remaining_bytes())
     if fuzz_test == 0:
         differential_fuzz(remaining_bytes)
@@ -45,6 +60,8 @@ def TestOneInput(data):
         fuzz_file_creation(remaining_bytes)
     elif fuzz_test == 2:
         fuzz_file_parser(remaining_bytes)
+    elif fuzz_test == 3:
+        fuzz_json_parser(remaining_bytes)
 
 
 def main():
