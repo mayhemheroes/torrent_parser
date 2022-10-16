@@ -29,7 +29,8 @@ def fuzz_file_parser(fdp: atheris.FuzzedDataProvider):
     data = fdp.ConsumeBytes(fdp.remaining_bytes())
     fp = io.BytesIO(data)
     try:
-        tp.TorrentFileParser(fp, use_ordered_dict=use_ordered_dict, hash_raw=hash_raw)
+        parser = tp.TorrentFileParser(fp, use_ordered_dict=use_ordered_dict, hash_raw=hash_raw)
+        parser.parse()
     except tp.InvalidTorrentDataException:
         pass
 
@@ -37,7 +38,8 @@ def fuzz_file_parser(fdp: atheris.FuzzedDataProvider):
 @atheris.instrument_func
 def fuzz_file_creation(fdp: atheris.FuzzedDataProvider):
     try:
-        tp.TorrentFileCreator(fdp.ConsumeBytes(fdp.remaining_bytes()))
+        creator = tp.TorrentFileCreator(fdp.ConsumeBytes(fdp.remaining_bytes()))
+        creator.create_filelike()
     except tp.InvalidTorrentDataException:
         pass
 
