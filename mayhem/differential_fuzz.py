@@ -8,10 +8,12 @@ with atheris.instrument_imports():
 
 
 @atheris.instrument_func
-def differential_fuzz(data):
+def differential_fuzz(fdp: atheris.FuzzedDataProvider):
+    hash_raw = fdp.ConsumeBool()
+    data = fdp.ConsumeBytes(fdp.remaining_bytes())
     try:
         encoded = tp.encode(data)
-        decoded = tp.decode(encoded)
+        decoded = tp.decode(encoded, hash_raw=hash_raw)
     except tp.InvalidTorrentDataException:
         pass
     else:
@@ -21,26 +23,29 @@ def differential_fuzz(data):
 
 
 @atheris.instrument_func
-def fuzz_file_parser(data):
+def fuzz_file_parser(fdp: atheris.FuzzedDataProvider):
+    use_ordered_dict = fdp.ConsumeBool()
+    hash_raw = fdp.ConsumeBool()
+    data = fdp.ConsumeBytes(fdp.remaining_bytes())
     fp = io.BytesIO(data)
     try:
-        tp.TorrentFileParser(fp)
+        tp.TorrentFileParser(fp, use_ordered_dict=use_ordered_dict, hash_raw=hash_raw)
     except tp.InvalidTorrentDataException:
         pass
 
 
 @atheris.instrument_func
-def fuzz_file_creation(data):
+def fuzz_file_creation(fdp: atheris.FuzzedDataProvider):
     try:
-        tp.TorrentFileCreator(data)
+        tp.TorrentFileCreator(fdp.ConsumeBytes(fdp.remaining_bytes()))
     except tp.InvalidTorrentDataException:
         pass
 
 
 @atheris.instrument_func
-def fuzz_json_parser(data):
+def fuzz_json_parser(fdp: atheris.FuzzedDataProvider):
     try:
-        encoded = tp.encode(data)
+        encoded = tp.encode(fdp.ConsumeBytes(fdp.remaining_bytes()))
         decoded = tp.decode(encoded)
         encoder = tp.JSONEncoderDataWrapperBytesToString()
         encoder.process(decoded)
@@ -53,15 +58,14 @@ def TestOneInput(data):
     fdp = atheris.FuzzedDataProvider(data)
 
     fuzz_test = fdp.ConsumeIntInRange(0, 3)
-    remaining_bytes = fdp.ConsumeBytes(fdp.remaining_bytes())
     if fuzz_test == 0:
-        differential_fuzz(remaining_bytes)
+        differential_fuzz(fdp)
     elif fuzz_test == 1:
-        fuzz_file_creation(remaining_bytes)
+        fuzz_file_creation(fdp)
     elif fuzz_test == 2:
-        fuzz_file_parser(remaining_bytes)
+        fuzz_file_parser(fdp)
     elif fuzz_test == 3:
-        fuzz_json_parser(remaining_bytes)
+        fuzz_json_parser(fdp)
 
 
 def main():
