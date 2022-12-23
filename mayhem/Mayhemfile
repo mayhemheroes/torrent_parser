@@ -1,0 +1,8 @@
+project: torrent-parser
+target: differential-fuzz
+testsuite:
+    - file://mayhem/testsuite
+
+cmds:
+  - cmd: /torrent_parser/mayhem/differential_fuzz.py
+    libfuzzer: true
