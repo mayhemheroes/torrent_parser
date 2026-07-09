@@ -1,0 +1,16 @@
+# Mayhem target: torrent_parser bencode parser/creator (Atheris/libFuzzer harness).
+# The cmd is a compiled ELF launcher that statically embeds CPython and runs
+# mayhem/differential_fuzz.py in-process: Mayhem's cloud coverage tracer measures the
+# MAIN executable, so the interpreter must live inside the target binary for the run
+# to record edges. Atheris instruments the torrent_parser module for libFuzzer's own
+# coverage feedback.
+project: torrent-parser
+target: differential-fuzz
+
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/differential-fuzz/testsuite
+
+cmds:
+  - cmd: /mayhem/torrent_parser_fuzzer
+    libfuzzer: true
