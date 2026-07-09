@@ -12,5 +12,5 @@ testsuite:
   - file://mayhem/differential-fuzz/testsuite
 
 cmds:
-  - cmd: /mayhem/torrent_parser_fuzzer
+  - cmd: /mayhem/mayhem/differential_fuzz.py
     libfuzzer: true
